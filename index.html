@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>考研资料导航</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; color: #333; }
+  .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 32px 16px; text-align: center; }
+  .header h1 { font-size: 28px; margin-bottom: 8px; }
+  .header p { font-size: 14px; opacity: 0.85; }
+  .container { max-width: 900px; margin: 0 auto; padding: 20px 16px; }
+  .search-box { width: 100%; padding: 14px 20px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 16px; outline: none; transition: border .3s; margin-bottom: 16px; }
+  .search-box:focus { border-color: #667eea; }
+  .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .tag { padding: 8px 18px; border-radius: 20px; border: 1px solid #ddd; cursor: pointer; font-size: 14px; transition: all .2s; background: white; }
+  .tag:hover { border-color: #667eea; color: #667eea; }
+  .tag.active { background: #667eea; color: white; border-color: #667eea; }
+  .stats { font-size: 13px; color: #999; margin-bottom: 16px; }
+  .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.06); transition: transform .2s, box-shadow .2s; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.1); }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .card-emoji { font-size: 24px; }
+  .card-title { font-size: 17px; font-weight: 600; flex: 1; }
+  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .card-tag { font-size: 12px; padding: 3px 10px; border-radius: 10px; background: #f0f0ff; color: #667eea; }
+  .card-desc { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 12px; }
+  .card-links { display: flex; gap: 8px; flex-wrap: wrap; }
+  .card-link { font-size: 13px; padding: 6px 14px; border-radius: 8px; text-decoration: none; background: #f5f5f5; color: #333; transition: all .2s; display: flex; align-items: center; gap: 4px; }
+  .card-link:hover { background: #667eea; color: white; }
+  .card-meta { font-size: 12px; color: #aaa; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .star-btn { cursor: pointer; font-size: 16px; background: none; border: none; padding: 4px 8px; border-radius: 6px; transition: .2s; }
+  .star-btn:hover { background: #fff3cd; }
+  .no-result { text-align: center; padding: 60px 20px; color: #999; }
+  .no-result .icon { font-size: 48px; margin-bottom: 12px; }
+  .footer { text-align: center; padding: 30px; font-size: 13px; color: #999; }
+  .footer a { color: #667eea; text-decoration: none; }
+  @media (max-width: 600px) {
+    .header h1 { font-size: 22px; }
+    .card { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📚 考研资料导航</h1>
+  <p>一站式聚合考研资源 · 持续更新</p>
+</div>
+
+<div class="container">
+  <input type="text" class="search-box" id="search" placeholder="🔍 搜索资料，如「肖秀荣」「张宇」「单词」..." oninput="render()">
+
+  <div class="tags" id="tags">
+    <span class="tag active" data-cat="全部" onclick="filter('全部', this)">全部</span>
+    <span class="tag" data-cat="政治" onclick="filter('政治', this)">🚩 政治</span>
+    <span class="tag" data-cat="英语" onclick="filter('英语', this)">🇬🇧 英语</span>
+    <span class="tag" data-cat="数学" onclick="filter('数学', this)">📐 数学</span>
+    <span class="tag" data-cat="专业课" onclick="filter('专业课', this)">📘 专业课</span>
+    <span class="tag" data-cat="工具" onclick="filter('工具', this)">🛠️ 实用工具</span>
+  </div>
+
+  <div class="stats" id="stats"></div>
+  <div id="list"></div>
+</div>
+
+<div class="footer">
+  资料来源于公开分享 · 链接失效请反馈 · 
+  <a href="https://github.com/Bookworm24/kaoyan-nav" target="_blank">GitHub Pages</a> 免费托管
+</div>
+
+<script>
+const data = [
+  // ===== 政治 =====
+  { id:1, title:"2026 肖秀荣 1000 题", category:"政治", tags:["肖秀荣","习题","PDF"], desc:"2026考研最新版，涵盖马原、史纲、毛中特、思修、时政五大板块，试题分册+解析分册。", links:[{n:"百度网盘",u:"#"},{n:"B站讲解",u:"#"}], source:"考研斯基", date:"2026-06" },
+  { id:2, title:"2026 肖秀荣精讲精练", category:"政治", tags:["肖秀荣","讲义","PDF"], desc:"肖秀荣全程复习核心教材，知识点全覆盖，配合 1000 题使用效果最佳。", links:[{n:"百度网盘",u:"#"}], source:"考研军火库", date:"2026-05" },
+  { id:3, title:"徐涛强化班网课合集", category:"政治", tags:["徐涛","网课","视频"], desc:"2026 徐涛考研政治强化班完整视频+配套讲义，讲解生动易懂。", links:[{n:"百度网盘",u:"#"},{n:"阿里云盘",u:"#"}], source:"考研元哥", date:"2026-06" },
+  { id:4, title:"腿姐冲刺背诵手册", category:"政治", tags:["腿姐","背诵","PDF"], desc:"陆寓丰（腿姐）冲刺阶段必备背诵手册，选择题+分析题高频考点汇总。", links:[{n:"百度网盘",u:"#"}], source:"腿姐考研政治", date:"2026-04" },
+  { id:5, title:"2026 考研政治时政合集", category:"政治", tags:["时政","热点","PDF"], desc:"全年国内外重大时政整理，含 20 届三中全会、两会等必考点。", links:[{n:"百度网盘",u:"#"}], source:"空卡空卡", date:"2026-06" },
+
+  // ===== 英语 =====
+  { id:6, title:"2026 唐迟阅读方法论", category:"英语", tags:["阅读","网课","视频"], desc:"唐迟老师阅读逻辑课，考研英语阅读核心方法论，含逐年真题精讲。", links:[{n:"百度网盘",u:"#"},{n:"B站合集",u:"#"}], source:"唐迟老师", date:"2026-05" },
+  { id:7, title:"红宝书考研英语词汇", category:"英语", tags:["单词","PDF"], desc:"2026 版红宝书（必考词+基础词+超纲词），附带默写本和音频。", links:[{n:"百度网盘",u:"#"}], source:"红宝书官方", date:"2026-03" },
+  { id:8, title:"刘晓燕长难句语法课", category:"英语", tags:["语法","网课","视频"], desc:"刘晓燕老师考研英语语法+长难句精讲，适合基础薄弱同学打底。", links:[{n:"百度网盘",u:"#"}], source:"刘晓燕", date:"2026-04" },
+  { id:9, title:"王江涛考研英语高分写作", category:"英语", tags:["写作","PDF","模板"], desc:"2026 版王道写作，大小作文模板+高分范文+常用句型汇总。", links:[{n:"百度网盘",u:"#"}], source:"王江涛", date:"2026-05" },
+  { id:10, title:"考研英语历年真题汇编", category:"英语", tags:["真题","PDF"], desc:"2000-2025 英语一+英语二真题 PDF，含解析和翻译逐句讲解。", links:[{n:"百度网盘",u:"#"},{n:"阿里云盘",u:"#"}], source:"考研汇", date:"2026-03" },
+
+  // ===== 数学 =====
+  { id:11, title:"张宇考研数学 36 讲", category:"数学", tags:["张宇","讲义","PDF"], desc:"2026 版张宇高等数学 18 讲+线性代数 9 讲+概率论 9 讲，全程核心教材。", links:[{n:"百度网盘",u:"#"},{n:"B站视频",u:"#"}], source:"张宇", date:"2026-05" },
+  { id:12, title:"汤家凤 1800 题", category:"数学", tags:["习题","PDF","汤家凤"], desc:"2026 版 1800 题，分基础篇+提高篇+冲刺篇，循序渐进。", links:[{n:"百度网盘",u:"#"}], source:"考研数学汤家凤", date:"2026-04" },
+  { id:13, title:"李永乐线性代数辅导讲义", category:"数学", tags:["线代","PDF","李永乐"], desc:"线代之王李永乐，考研线代公认最佳教材，零基础也能看懂。", links:[{n:"百度网盘",u:"#"}], source:"李永乐", date:"2026-03" },
+  { id:14, title:"2026 考研数学公式速查卡", category:"数学", tags:["公式","速查","PDF"], desc:"高数+线代+概率论核心公式一张纸汇总，考前快速回顾。", links:[{n:"百度网盘",u:"#"}], source:"考研加油", date:"2026-06" },
+
+  // ===== 专业课 =====
+  { id:15, title:"408 计算机统考历年真题", category:"专业课", tags:["408","真题","PDF"], desc:"2009-2025 年 408 计算机统考真题及详细解析。", links:[{n:"百度网盘",u:"#"}], source:"王道论坛", date:"2026-04" },
+  { id:16, title:"考研专业课历年真题汇总", category:"专业课", tags:["真题","院校"], desc:"各高校专业课真题汇总入口，按学校/专业检索。", links:[{n:"真题网站",u:"#"}], source:"考研帮", date:"2026-05" },
+
+  // ===== 工具 =====
+  { id:17, title:"墨墨背单词 App", category:"工具", tags:["App","单词"], desc:"考研词汇量科学记忆，艾宾浩斯遗忘曲线，真题例句。", links:[{n:"App Store",u:"#"},{n:"官网",u:"#"}], source:"官方", date:"2026-06" },
+  { id:18, title:"番茄ToDo 学习计时器", category:"工具", tags:["App","时间管理"], desc:"番茄钟学习法，记录每日学习时长，考研必备自律工具。", links:[{n:"App Store",u:"#"}], source:"官方", date:"2026-06" },
+];
+
+let currentCat = '全部';
+let favorites = JSON.parse(localStorage.getItem('favs') || '[]');
+
+function createCard(d) {
+  const favOn = favorites.includes(d.id);
+  return `
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">${d.title}</span>
+    </div>
+    <div class="card-tags">${d.tags.map(t => `<span class="card-tag">#${t}</span>`).join(' ')}</div>
+    <div class="card-desc">${d.desc}</div>
+    <div class="card-links">${d.links.map(l => `<a class="card-link" href="${l.u}" target="_blank" rel="noopener">📥 ${l.n}</a>`).join('')}</div>
+    <div class="card-meta">
+      <span>来源：${d.source} · ${d.date}</span>
+      <button class="star-btn" onclick="toggleFav(${d.id})">${favOn ? '⭐' : '☆'}</button>
+    </div>
+  </div>`;
+}
+
+function filter(cat, el) {
+  currentCat = cat;
+  document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function toggleFav(id) {
+  const idx = favorites.indexOf(id);
+  if (idx > -1) favorites.splice(idx, 1);
+  else favorites.push(id);
+  localStorage.setItem('favs', JSON.stringify(favorites));
+  render();
+}
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  let items = data;
+  if (currentCat !== '全部') items = items.filter(d => d.category === currentCat);
+  if (q) items = items.filter(d => d.title.toLowerCase().includes(q) || d.tags.some(t => t.toLowerCase().includes(q)) || d.desc.toLowerCase().includes(q));
+
+  document.getElementById('stats').textContent = `找到 ${items.length} 个资料`;
+  document.getElementById('list').innerHTML = items.length
+    ? items.map(createCard).join('')
+    : `<div class="no-result"><div class="icon">📭</div><p>没有找到匹配的资料</p><p style="font-size:13px;margin-top:8px;">试试其他关键词或分类</p></div>`;
+}
+
+render();
+</script>
+</body>
+</html>
